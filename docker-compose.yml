@@ -1,0 +1,105 @@
+version: "3.5"
+
+services:
+  web:
+    build: ./web
+    image: xram_memory/web
+    container_name: "xram_memory_web"
+    env_file:
+      - .env
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
+      - web
+    labels:
+      - "traefik.frontend.rule=Host:${DOMAIN}"
+
+  webadmin:
+    build: ./webadmin
+    image: xram_memory/webadmin
+    container_name: "xram_memory_webadmin"
+    env_file:
+      - .env
+    tmpfs:
+      - /tmp
+    restart: always
+    volumes:
+      - media/:/app/media/
+      - static/:/app/staticfiles/
+    networks:
+      - web
+    labels:
+      - "traefik.frontend.rule=Host:${DOMAIN};PathPrefix:/admin/,/api/v1/,/filer/,/tags_input/"
+      - "traefik.frontend.passHostHeader=true"
+    ports:
+      - 8000
+  files:
+    image: kyma/docker-nginx
+    container_name: "xram_memory_files"
+    env_file:
+      - .env
+    tmpfs:
+      - /tmp
+    restart: always
+    volumes:
+      - media/:/var/www/media/
+      - static/:/var/www/static/
+    networks:
+      - web
+    labels:
+      - "traefik.frontend.rule=Host:${DOMAIN};PathPrefix:/static/,/media/"
+
+  celery-worker-1:
+    build: ./celery_worker
+    image: xram_memory/celery_worker
+    container_name: "xram_memory_celery_worker_1"
+    tmpfs:
+      - /tmp
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - media/:/app/media/
+    networks:
+      - internal
+    labels:
+      - traefik.enable=false
+
+  redis:
+    image: wodby/redis:4.0
+    container_name: xram_memory_redis
+    restart: always
+    networks:
+      - internal
+    sysctls:
+      net.core.somaxconn: '511'
+    labels:
+      - traefik.enable=false
+
+  reverse-proxy:
+    image: traefik # The official Traefik docker image
+    command: --api --docker # Enables the web UI and tells Traefik to listen to docker
+    ports:
+      - "80:80"     # The HTTP port
+      - "8080:8080" # The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+  internal:
+    name: "xram_memory_net_internal"
+
+volumes:
+  media:
+    external:
+      name: xram_memory_webadmin_media
+
+  static:
+    external:
+      name: xram_memory_webadmin_static
+
