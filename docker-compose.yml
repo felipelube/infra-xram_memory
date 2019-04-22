@@ -29,11 +29,14 @@ services:
       - static/:/app/staticfiles/
     networks:
       - web
+      - internal
     labels:
       - "traefik.frontend.rule=Host:${DOMAIN};PathPrefix:/admin/,/api/v1/,/filer/,/tags_input/"
       - "traefik.frontend.passHostHeader=true"
+      - "traefik.docker.network=web"
     ports:
       - 8000
+
   files:
     image: kyma/docker-nginx
     container_name: "xram_memory_files"
@@ -74,6 +77,8 @@ services:
       - internal
     sysctls:
       net.core.somaxconn: '511'
+    ports:
+      - 6379
     labels:
       - traefik.enable=false
 
@@ -92,7 +97,7 @@ networks:
   web:
     external: true
   internal:
-    name: "xram_memory_net_internal"
+    internal: true
 
 volumes:
   media:
