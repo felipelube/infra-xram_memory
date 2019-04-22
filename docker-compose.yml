@@ -21,6 +21,8 @@ services:
     container_name: "xram_memory_webadmin"
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=mysql://xram_user:xram_password@xram_memory_db:3306/xram_memory
     tmpfs:
       - /tmp
     restart: always
@@ -36,6 +38,26 @@ services:
       - "traefik.docker.network=web"
     ports:
       - 8000
+
+  database:
+    image: library/mariadb
+    container_name: "xram_memory_db"
+    tmpfs:
+      - /tmp
+    restart: always
+    environment:
+      - MYSQL_DATABASE=xram_memory
+      - MYSQL_USER=xram_user
+      - MYSQL_PASSWORD=xram_password
+      - MYSQL_ROOT_PASSWORD=root_pswwd
+    volumes:
+      - database/:/var/lib/mysql
+    networks:
+      - internal
+    labels:
+      - traefik.enable=false
+    ports:
+      - 3306
 
   files:
     image: kyma/docker-nginx
@@ -60,8 +82,13 @@ services:
     tmpfs:
       - /tmp
     restart: always
+    dns:
+      - 8.8.8.8
+      - 4.4.4.4
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=mysql://xram_user:xram_password@xram_memory_db:3306/xram_memory
     volumes:
       - media/:/app/media/
     networks:
@@ -107,4 +134,8 @@ volumes:
   static:
     external:
       name: xram_memory_webadmin_static
+
+  database:
+    external:
+      name: xram_memory_db_data
 
