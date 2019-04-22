@@ -1,4 +1,4 @@
-FROM xram_memory/webadmin:0.8.0
+FROM xram_memory/webadmin
 
 COPY entrypoint.sh ./
 
