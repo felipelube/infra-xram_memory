@@ -147,7 +147,22 @@ services:
         aliases:
           - xram-memory.local # TODO: remover em produção?
           - es1-xram-memory.local # TODO: remover em produção?
+  
+  contact_message_relay:
+    build: ./contact_message_relay
+    image: xram_memory/contact_message_relay
+    container_name: "xram_memory_contact_mr"
+    env_file:
+      - .env
+      - contact_message_relay.env
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
       - web
+    labels:
+      - "traefik.frontend.rule=Host:contact-${DOMAIN}"
+
 
 networks:
   web:
