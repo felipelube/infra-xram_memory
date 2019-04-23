@@ -143,6 +143,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
     networks:
+      web:
+        aliases:
+          - xram-memory.local # TODO: remover em produção?
+          - es1-xram-memory.local # TODO: remover em produção?
       - web
 
 networks:
