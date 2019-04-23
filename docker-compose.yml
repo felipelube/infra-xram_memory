@@ -19,6 +19,12 @@ services:
     restart: always
     networks:
       - web
+    environment:
+      ELASTIC_SEARCH_SERVER: $ELASTIC_SEARCH_SERVER
+      CONTACT_MESSAGE_RELAY_URL: $CONTACT_MESSAGE_RELAY_URL
+      RECAPTCHA_KEY: $RECAPTCHA_KEY
+      MEDIA_URL: $MEDIA_URL
+      API_URL: $API_URL
     labels:
       - "traefik.frontend.rule=Host:${DOMAIN}"
 
@@ -34,6 +40,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    env_file:
+      - .env
     volumes:
       - es-data1:/usr/share/elasticsearch/data
       #- ./root-ca.pem:/usr/share/elasticsearch/config/root-ca.pem
@@ -58,8 +66,7 @@ services:
     container_name: "xram_memory_webadmin"
     env_file:
       - .env
-    environment:
-      - DATABASE_URL=mysql://xram_user:xram_password@xram_memory_db:3306/xram_memory
+      - backend.env
     tmpfs:
       - /tmp
     restart: always
@@ -80,11 +87,8 @@ services:
     tmpfs:
       - /tmp
     restart: always
-    environment:
-      - MYSQL_DATABASE=xram_memory
-      - MYSQL_USER=xram_user
-      - MYSQL_PASSWORD=xram_password
-      - MYSQL_ROOT_PASSWORD=root_pswwd
+    env_file:
+      - backend.env
     volumes:
       - database/:/var/lib/mysql
     networks:
@@ -119,8 +123,7 @@ services:
     restart: always
     env_file:
       - .env
-    environment:
-      - DATABASE_URL=mysql://xram_user:xram_password@xram_memory_db:3306/xram_memory
+      - backend.env
     volumes:
       - media/:/app/media/
     networks:
