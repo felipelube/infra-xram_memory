@@ -2,11 +2,18 @@ version: "3.5"
 
 services:
   web:
-    build: ./web
-    image: xram_memory/web
-    container_name: "xram_memory_web"
     env_file:
       - .env
+    build:
+      context: ./web
+      args:
+        ELASTIC_SEARCH_SERVER: $ELASTIC_SEARCH_SERVER
+        CONTACT_MESSAGE_RELAY_URL: $CONTACT_MESSAGE_RELAY_URL
+        RECAPTCHA_KEY: $RECAPTCHA_KEY
+        MEDIA_URL: $MEDIA_URL
+        API_URL: $API_URL
+    image: xram_memory/web
+    container_name: "xram_memory_web"
     tmpfs:
       - /tmp
     restart: always
