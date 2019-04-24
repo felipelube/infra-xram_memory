@@ -178,7 +178,6 @@ networks:
   web:
     external: true
   internal:
-    internal: true
 
 volumes:
   media:
