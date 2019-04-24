@@ -157,7 +157,7 @@ services:
         aliases:
           - xram-memory.local # TODO: remover em produção?
           - es1-xram-memory.local # TODO: remover em produção?
-  
+
   contact_message_relay:
     build: ./contact_message_relay
     image: xram_memory/contact_message_relay
