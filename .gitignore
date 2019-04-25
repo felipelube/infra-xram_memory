@@ -3,6 +3,7 @@
 .vscode
 elastic_search/certificates/out/*
 elastic_search/certificates/*.yml
+elastic_search/*.yml
 elastic_search/internal_users.yml
 proxy/acme.json
 proxy/certificates
