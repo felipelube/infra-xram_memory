@@ -1,0 +1,1 @@
+Use a ferramenta [TLS Tool](https://docs.search-guard.com/latest/offline-tls-tool) do Search Guard para gerar os certificados com base na configuração em xram-memory.yml.dist.
