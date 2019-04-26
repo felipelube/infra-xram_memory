@@ -85,7 +85,7 @@ services:
 
 
   database:
-    image: library/mariadb
+    image: postgres:alpine
     container_name: "xram_memory_db"
     tmpfs:
       - /tmp
@@ -93,11 +93,9 @@ services:
     env_file:
       - backend.env
     volumes:
-      - database/:/var/lib/mysql
+      - database/:/var/lib/postgresql/data
     networks:
       - internal
-    ports:
-      - 3306
 
   files:
     image: kyma/docker-nginx
