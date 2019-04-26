@@ -43,19 +43,24 @@ services:
     env_file:
       - .env
     volumes:
+      # volume com os dados
       - es-data1:/usr/share/elasticsearch/data
+      # autoridade certificadora
       - ./elastic_search/certificates/out/root-ca.pem:/usr/share/elasticsearch/config/root-ca.pem
-
+      # certificados da REST api
       - ./elastic_search/certificates/out/es-node1.pem:/usr/share/elasticsearch/config/esnode.pem
       - ./elastic_search/certificates/out/es-node1.key:/usr/share/elasticsearch/config/esnode-key.key
-
+      # certificados de transporte
       - ./elastic_search/certificates/out/es-node1_http.pem:/usr/share/elasticsearch/config/esnode_http.pem
       - ./elastic_search/certificates/out/es-node1_http.key:/usr/share/elasticsearch/config/esnode-key_http.key
-
+      # certificados administrativos
       - ./elastic_search/certificates/out/kirk.pem:/usr/share/elasticsearch/config/kirk.pem
       - ./elastic_search/certificates/out/kirk.key:/usr/share/elasticsearch/config/kirk-key.pem
-
+      # configuração geral
       - ./elastic_search/custom-elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      # papéis e usuários
+      - ./elastic_search/roles.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles.yml
+      - ./elastic_search/roles_mapping.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles_mapping.yml
       - ./elastic_search/internal_users.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/internal_users.yml
     networks:
       - internal

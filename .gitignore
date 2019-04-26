@@ -4,6 +4,7 @@
 elastic_search/certificates/out/*
 elastic_search/certificates/*.yml
 elastic_search/*.yml
-elastic_search/internal_users.yml
+!elastic_search/roles.yml
+!elastic_search/roles_mapping.yml
 proxy/acme.json
 proxy/certificates
