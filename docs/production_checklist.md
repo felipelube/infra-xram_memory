@@ -1,0 +1,13 @@
+- [ ] Sincronizar submódulos
+- [ ] Reconstruir imagens
+- [ ] Gerar certificados do Elastic Search
+- [ ] Configurar o proxy para redirecionar HTTP => HTTPS
+- [ ] Alterar senhas do Banco de Dados, Chave do ES, Usuários do ES etc.
+- [ ] Aplicar as configurações dentro do container do ES
+- [ ] Verificar as permissões dos arquivos, especialmente dos certificados e chaves
+- [ ] Construir o índice do ES / Popular o índice
+- [ ] Criar um super-usuário
+
+- [ ] Testar a busca
+- [ ] Testar a inserção de notícias, inclusive em massa
+- [ ] Testar o envio de e-mails
