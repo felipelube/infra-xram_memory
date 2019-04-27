@@ -44,7 +44,7 @@ rootCAs = [ "./root-ca.pem" ]
   backend = "xram-memory_contact"
   passHostHeader = true
     [frontends.xram-memory_contact.routes.main]
-    rule = "Host:contact-xram-memory.local"
+    rule = "Host:contact.xram-memory.local"
 
 
 [backends]
