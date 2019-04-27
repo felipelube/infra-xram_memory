@@ -125,16 +125,14 @@ services:
     networks:
       - internal
 
-  redis:
-    image: wodby/redis:4.0
-    container_name: xram_memory_redis
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: xram_memory_rabbitmq
     restart: always
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error}]
     networks:
       - internal
-    sysctls:
-      net.core.somaxconn: '511'
-    ports:
-      - 6379
 
   reverse-proxy:
     image: traefik # The official Traefik docker image
