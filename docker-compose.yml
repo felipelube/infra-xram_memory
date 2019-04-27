@@ -55,7 +55,7 @@ services:
       - ./elastic_search/certificates/out/es-node1_http.key:/usr/share/elasticsearch/config/esnode-key_http.key
       # certificados administrativos
       - ./elastic_search/certificates/out/kirk.pem:/usr/share/elasticsearch/config/kirk.pem
-      - ./elastic_search/certificates/out/kirk.key:/usr/share/elasticsearch/config/kirk-key.pem
+      - ./elastic_search/certificates/out/kirk-key.pem:/usr/share/elasticsearch/config/kirk-key.pem
       # configuração geral
       - ./elastic_search/custom-elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       # papéis e usuários
