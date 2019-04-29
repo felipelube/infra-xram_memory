@@ -137,18 +137,16 @@ services:
   reverse-proxy:
     image: traefik # The official Traefik docker image
     container_name: proxy
-    command: --api
     restart: always
     env_file:
       - ./proxy/.env
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
     volumes:
       - ./proxy/traefik.toml:/etc/traefik/traefik.toml:ro
       - ./elastic_search/certificates/out/root-ca.pem:/etc/traefik/root-ca.pem
-      #- ./proxy/acme.json:/acme.json:rw
+      - ./proxy/acme.json:/acme.json:rw
     networks:
       web:
         aliases:
