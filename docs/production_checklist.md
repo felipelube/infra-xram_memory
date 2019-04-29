@@ -12,19 +12,30 @@
   chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_static/_data/ -R
   chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_media/_data/ -R
   ```
-- [ ] Definir variáveis ambiente
+- [ ] Criar arquivos para variáveis-ambiente
+  ```bash
+  cp .env.dist .env
+  cp backend.env.dist backend.env
+  cp contact_message_relay.env.dist contact_message_relay.env
+  cp .env.dist .env
+  ```
+- [ ] Definir variáveis ambiente dentro dos arquivos
+- [-] Assegurar a permissão dos arquivos
 - [ ] Reconstruir imagens
+  ```
+  docker-compose build
+  ```
 - [ ] Criar arquivos de configuração do ElasticSearch
 - [ ] Gerar certificados do Elastic Search
   Ferramenta disponível em: https://docs.search-guard.com/latest/offline-tls-tool
 
-  0. gerar um arquivo de configuração para a ferramenta
-  1. executar um container com o java https://hub.docker.com/_/openjdk
+  - [ ] gerar um arquivo de configuração para a ferramenta
+  - [x ] executar um container com o java https://hub.docker.com/_/openjdk
     `docker run -it --rm -v <pasta dos certificados>:/root/tools/out openjdk:8 bash`
   2. no container, baixe a ferramenta tls-tool
     `wget <url>`
   3. Gere a autoridade certificadora
-    `./sgtlstool.sh -ca -c <arquivo de configuração>`
+    `./sgtlstool.sh -ca -c xram-memory.yml`
   4. Gere os certificados para os nodes
     `./sgtlstool.sh -crt -c xram-memory.yml`
   5. Converta o certificado administrativo para o formato PKCS#8
@@ -45,7 +56,7 @@
     -kspass <senha de encriptação dos certificados>
 
    ```
-- [ ] Suba os outros containers
+- [ ] Suba os outros containers, menos o proxy
 - [ ] Crie um super usuário para webadmin
   ```
   docker exec -it xram_memory_webadmin ./manage.py createsuperuser
@@ -56,8 +67,6 @@
   ```
 - [ ] Configurar o proxy para redirecionar HTTP => HTTPS
 - [ ] Verificar as permissões dos arquivos, especialmente dos certificados e chaves
-- [ ] Construir o índice do ES / Popular o índice
-- [ ] Criar um super-usuário
 
 - [ ] Testar a busca
 - [ ] Testar a inserção de notícias, inclusive em massa
