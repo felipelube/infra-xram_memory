@@ -8,22 +8,17 @@
   docker volume create xram_memory_es1_data
   ```
 - [ ] Dar permissão ao usuário www-data nos volumes de arquivos:
-  ```bash
-  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_static/_data/ -R
-  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_media/_data/ -R
-  ```
 - [ ] Criar arquivos para variáveis-ambiente
   ```bash
   cp .env.dist .env
   cp backend.env.dist backend.env
   cp contact_message_relay.env.dist contact_message_relay.env
   cp .env.dist .env
+  cp ./proxy/.env.dist ./proxy/.env
   ```
-- [ ] Definir variáveis ambiente dentro dos arquivos
-- [-] Assegurar a permissão dos arquivos
-- [ ] Reconstruir imagens
-  ```
-  docker-compose build
+  ```bash
+  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_static/_data/ -R
+  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_media/_data/ -R
   ```
 - [ ] Criar arquivos de configuração do ElasticSearch
 - [ ] Gerar certificados do Elastic Search
@@ -41,9 +36,18 @@
   5. Converta o certificado administrativo para o formato PKCS#8
     `openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in ./out/kirk.key -out ./out/kirk-key.pem`
 - [ ] Coloque a senha que encriptou os certificados na configuração do ES
-- [ ] Suba o container do ES
+- [ ] Suba apenas o container do ES
+   ```bash
+   docker-compose up es-node1
+   ```
 - [ ] Gere senhas para os usuários do ES e substitua essas informações nos arquivos de var. ambiente
   `docker exec es-node1 /bin/sh /usr/share/elasticsearch/plugins/opendistro_security/tools/hash.sh -p <senha>`
+- [ ] Definir variáveis ambiente dentro dos arquivos
+- [ ] Assegurar a permissão dos arquivos
+- [ ] Reconstruir imagens
+  ```
+  docker-compose build
+  ```
 - [ ] Aplicar as configurações dentro do container do ES
   ```bash
   docker exec -it es-node1 bash
