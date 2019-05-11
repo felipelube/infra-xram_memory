@@ -183,11 +183,11 @@ own_index:
         - INDICES_ALL
 
 # um papel de somente leitura para o índice da aplicação
-read_artifact_news:
+read_xram_memory:
   cluster:
     - CLUSTER_COMPOSITE_OPS_RO
   indices:
-    'artifact_news':
+    'artifact_*':
       '*':
         - READ
         - SEARCH

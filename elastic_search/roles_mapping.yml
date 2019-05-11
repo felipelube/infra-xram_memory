@@ -33,6 +33,6 @@ own_index:
   users:
     - '*'
 
-read_artifact_news:
+read_xram_memory:
   users:
-    - artifact_news_read
+    - xram_memory_read

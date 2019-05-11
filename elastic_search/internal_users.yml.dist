@@ -10,13 +10,13 @@ admin:
     attribute2: value2
     attribute3: value3
 
-artifact_news_read:
+xram_memory_read:
   readonly: true
   hash: #TODO:
   roles:
-    - read_artifact_news
+    - read_xram_memory
 
-artifact_news:
+xram_memory:
   readonly: true
   hash: #TODO:
   roles:
