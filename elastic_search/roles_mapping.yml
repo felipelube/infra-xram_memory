@@ -36,3 +36,7 @@ own_index:
 read_xram_memory:
   users:
     - xram_memory_read
+
+admin_xram_memory:
+  users:
+    - xram_memory_admin

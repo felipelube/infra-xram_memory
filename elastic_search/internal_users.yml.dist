@@ -1,7 +1,7 @@
-# New password applied
+# Administrador
 admin:
   readonly: true
-  hash: #TODO:
+  hash: $2y$12$8SqmcQQzzSlxbn/L75vjyOCl5dFaX251j/uVYEeGIaSOWC9ePKP16
   roles:
     - admin
   attributes:
@@ -10,14 +10,16 @@ admin:
     attribute2: value2
     attribute3: value3
 
+# Usuário usado pelo cliente web para ler os índices
 xram_memory_read:
   readonly: true
-  hash: #TODO:
+  hash: $2y$12$aKTkgqaq9sxx/4nnluKQMOoMiI0WIPRNbkY1M7WubFAi5k9UCWfjW
   roles:
     - read_xram_memory
 
-xram_memory:
+# Usuário administrativo para os índices da aplicação
+xram_memory_admin:
   readonly: true
   hash: #TODO:
   roles:
-    - own_index
+    - admin_xram_memory

@@ -191,3 +191,12 @@ read_xram_memory:
       '*':
         - READ
         - SEARCH
+
+
+admin_xram_memory:
+  cluster:
+    - CLUSTER_COMPOSITE_OPS
+  indices:
+    'artifact_*':
+      '*':
+        - INDICES_ALL
