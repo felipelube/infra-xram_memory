@@ -8,24 +8,23 @@
   docker volume create xram_memory_es1_data
   ```
 - [ ] Dar permissão ao usuário www-data nos volumes de arquivos:
+  ```bash
+  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_media/_data/ -R
+  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_static/_data/ -R
+  ```
 - [ ] Criar arquivos para variáveis-ambiente
   ```bash
   cp .env.dist .env
   cp backend.env.dist backend.env
   cp contact_message_relay.env.dist contact_message_relay.env
-  cp .env.dist .env
   cp ./proxy/.env.dist ./proxy/.env
-  ```
-  ```bash
-  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_static/_data/ -R
-  chown 33:33 /var/lib/docker/volumes/xram_memory_webadmin_media/_data/ -R
   ```
 - [ ] Criar arquivos de configuração do ElasticSearch
 - [ ] Gerar certificados do Elastic Search
   Ferramenta disponível em: https://docs.search-guard.com/latest/offline-tls-tool
 
   - [ ] gerar um arquivo de configuração para a ferramenta
-  - [x ] executar um container com o java https://hub.docker.com/_/openjdk
+  - [ ] executar um container com o java https://hub.docker.com/_/openjdk
     `docker run -it --rm -v <pasta dos certificados>:/root/tools/out openjdk:8 bash`
   2. no container, baixe a ferramenta tls-tool
     `wget <url>`
