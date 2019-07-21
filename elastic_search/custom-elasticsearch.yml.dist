@@ -13,7 +13,7 @@ opendistro_security.ssl.http.enabled: false
 opendistro_security.ssl.http.pemcert_filepath: esnode_http.pem
 opendistro_security.ssl.http.pemkey_filepath: esnode-key_http.key
 opendistro_security.ssl.http.pemtrustedcas_filepath: root-ca.pem
-opendistro_security.ssl.http.pemkey_password:
+opendistro_security.ssl.http.pemkey_password: #TODO:
 
 opendistro_security.allow_unsafe_democertificates: false
 
