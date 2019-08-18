@@ -1,9 +1,9 @@
 [submodule "webadmin"]
 	path = webadmin
-	url = https://github.com/felubra/django-xram_memory.git
+	url = git@github.com:felubra/django-xram_memory.git
 [submodule "web"]
 	path = web
-	url = https://github.com/felubra/nuxt-xram-memory.git
+	url = git@github.com:felubra/nuxt-xram-memory.git
 [submodule "contact_message_relay"]
 	path = contact_message_relay
-	url = https://github.com/felubra/xram_memory-contact_message_relay.git
+	url = git@github.com:felubra/xram_memory-contact_message_relay.git
