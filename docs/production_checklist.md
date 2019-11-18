@@ -23,6 +23,7 @@
 - [ ] Gerar certificados do Elastic Search
    - [ ] gerar um arquivo de configuração para a ferramenta, preencher as senhas e as configurações LDAP, de acordo com o domínio publicado:
    ```bash
+   cd elastic_search/certificates
    cp xram-memory.yml.dist xram-memory.yml
    vim xram-memory.yml
    ```
@@ -33,6 +34,7 @@
       ```bash
       wget -O tlstool.zip https://search.maven.org/remotecontent?filepath=com/floragunn/search-guard-tlstool/1.7/search-guard-tlstool-1.7.zip
       unzip tlstool.zip
+      cd tools
       ```
   3. Gere a autoridade certificadora
     `./sgtlstool.sh -ca -c ./out/xram-memory.yml ./out`
@@ -43,7 +45,7 @@
   6. saia do container
 - [ ] Verifique se os arquivos de certificado (*.pem e *.key) estão em ./elastic_search/certificates/out/
 - [ ] Verifique a configuração do elastic_search
-   1. 
+   1.
    ```bash
    cd ../
    vim custom-elasticsearch.yml
@@ -57,7 +59,7 @@
       (geralmente a mesma senha)
    4. `http.cors.allow-origin` deve ser a url do serviço `web`, do site.
 
-- [ ] Suba apenas o container do ES
+- [ ] Retorne ao diretório principal e suba apenas o container do ES
    ```bash
    docker-compose up -d es-node1
    ```
