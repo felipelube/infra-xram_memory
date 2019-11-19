@@ -175,13 +175,14 @@ services:
       - web
 
   backup:
-    image: b3vis/borgmatic:v1.1.10-1.4.0
+    image: xram_memory/backup:alpine-3.10
+    build: ./backup
     container_name: xram_memory_backup
     restart: unless-stopped
     volumes:
       - media:/mnt/source/media:ro
       - borg-repo:/mnt/borg-repository
-      - ./backup/config/:/etc/borgmatic.d
+      - ./backup/data/.config:/etc/borgmatic.d
       - borg-cache:/root/.cache/borg
     networks:
       - internal
@@ -206,3 +207,11 @@ volumes:
   es-data1:
     external:
       name: xram_memory_es1_data
+
+  borg-repo:
+    external:
+      name: xram_memory_backup_repo
+
+  borg-cache:
+    external:
+      name: xram_memory_backup_cache

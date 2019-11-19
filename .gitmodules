@@ -8,3 +8,6 @@
 	path = contact_message_relay
 	url = https://github.com/felubra/xram_memory-contact_message_relay.git
 	branch = dev
+[submodule "backup"]
+	path = backup
+	url = https://github.com/felubra/docker-borgmatic.git

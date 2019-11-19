@@ -112,3 +112,20 @@
 - [ ] Testar a busca
 - [ ] Testar a inserção de notícias, inclusive em massa
 - [ ] Testar o envio de e-mails
+
+## Backups
+- [ ] Criar os volumes para backup
+```bash
+  docker volume create xram_memory_backup_cache
+  docker volume create xram_memory_backup_repo
+```
+
+- [ ] Entrar no container e criar um repositório em /mnt/borg-repository
+```bash
+  docker exec -it xram_memory_backup sh
+  cd /mnt/borg-repository/
+  borg init -e repokey-blake2  ./
+  <inserir a senha do repositório>
+```
+- [ ] Usar a mesma senha criada no arquivo de configuração
+- [ ] Reiniciar o container de backup
