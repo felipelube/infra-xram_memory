@@ -8,3 +8,4 @@ elastic_search/*.yml
 !elastic_search/roles_mapping.yml
 proxy/acme.json
 proxy/certificates
+proxy/traefik.toml
