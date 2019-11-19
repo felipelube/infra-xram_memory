@@ -86,7 +86,7 @@ services:
 
 
   database:
-    image: postgres:alpine
+    image: postgres:11.6-alpine
     container_name: "xram_memory_db"
     tmpfs:
       - /tmp
