@@ -1,0 +1,101 @@
+logLevel = "ERROR"
+defaultEntryPoints = ["http"]
+#defaultEntryPoints = ["https","http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    #[entryPoints.http.redirect]
+    #entryPoint = "https"
+  #[entryPoints.https]
+  #address = ":443"
+  #[entryPoints.https.tls]
+
+[retry]
+
+[frontends]
+  [frontends.xram-memory_web]
+  backend = "xram-memory_web"
+  passHostHeader = true
+    [frontends.xram-memory_web.routes.main]
+    rule = "Host:xram-memory.local"
+
+  [frontends.xram-memory_webadmin]
+  backend = "xram-memory_webadmin"
+  priority = 50
+  passHostHeader = true
+    [frontends.xram-memory_webadmin.routes.main]
+    rule = "Host:xram-memory.local;PathPrefix:/admin/,/api/v1/,/filer/,/tags_input/"
+
+  [frontends.xram-memory_files]
+  backend = "xram-memory_files"
+  passHostHeader = true
+  priority = 40
+    [frontends.xram-memory_files.routes.main]
+    rule = "Host:xram-memory.local;PathPrefix:/static/,/media/"
+
+  [frontends.es1-xram-memory]
+  backend = "es1-xram-memory"
+  passHostHeader = true
+    [frontends.es1-xram-memory.routes.main]
+    rule = "Host:es1.xram-memory.local"
+
+  [frontends.xram-memory_contact]
+  backend = "xram-memory_contact"
+  passHostHeader = true
+    [frontends.xram-memory_contact.routes.main]
+    rule = "Host:contact.xram-memory.local"
+
+
+[backends]
+  [backends.xram-memory_webadmin]
+    [backends.xram-memory_webadmin.servers.server1]
+    url = "http://xram_memory_webadmin:8000"
+
+  [backends.xram-memory_files]
+    [backends.xram-memory_files.servers.server1]
+    url = "http://xram_memory_files:80"
+
+  [backends.xram-memory_web]
+    [backends.xram-memory_web.servers.server1]
+    url = "http://xram_memory_web:3000"
+
+  [backends.es1-xram-memory]
+    [backends.es1-xram-memory.servers.server1]
+    url = "http://es-node1:9200"
+
+  [backends.xram-memory_contact]
+    [backends.xram-memory_contact.servers.server1]
+    url = "http://xram_memory_contact_mr:3001"
+
+[file]
+filename = "/etc/traefik/traefik.toml"
+watch = true
+
+
+#[acme]
+#email = "felipe.lubra@gmail.com"
+#storage = "/acme.json"
+#entryPoint = "https"
+#acmeLogging = true
+#onHostRule = false
+#onDemand = true
+
+# CA server to use.
+# Uncomment the line to use Let's Encrypt's staging server,
+# leave commented to go to prod.
+#
+# Optional
+# Default: "https://acme-v02.api.letsencrypt.org/directory"
+#
+#caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+#  [acme.httpChallenge]
+#  entryPoint = "http"
+
+#  [acme.dnsChallenge]
+#  provider = "cloudflare"
+
+#[[acme.domains]]
+#main = "local"
+#sans = ["api.bento.local", "admin.bento.local", "es1.xram-memory.local", "es2-xram-memory.local", "xram-memory.local", "contact.xram-memory.local"]
