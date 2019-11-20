@@ -10,4 +10,4 @@
 	branch = dev
 [submodule "backup"]
 	path = backup
-	url = https://github.com/felubra/docker-borgmatic.git
+	url = https://github.com/felubra/borgmatic-xram_memory.git
