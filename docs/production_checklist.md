@@ -6,6 +6,8 @@
   docker volume create xram_memory_webadmin_static
   docker volume create xram_memory_db_data
   docker volume create xram_memory_es1_data
+  docker volume create xram_memory_backup_repo
+  docker volume create xram_memory_backup_cache
   ```
 - [ ] Dar permissão ao usuário www-data nos volumes de arquivos:
   ```bash
@@ -14,7 +16,7 @@
   ```
 - [ ] Criar arquivos para variáveis-ambiente
   ```bash
-  cp .env.dist .env && cp backend.env.dist backend.env && cp contact_message_relay.env.dist contact_message_relay.env && cp ./proxy/.env.dist ./proxy/.env 
+  cp .env.dist .env && cp backend.env.dist backend.env && cp contact_message_relay.env.dist contact_message_relay.env && cp ./proxy/.env.dist ./proxy/.env
   ```
 - [ ] Criar arquivos de configuração do ElasticSearch
   ```bash
@@ -50,12 +52,12 @@
    cd ../
    vim custom-elasticsearch.yml
    ```
-   2. verifique as configurações `opendistro_security.nodes_dn` e `opendistro_security.authcz.admin_dn`, 
+   2. verifique as configurações `opendistro_security.nodes_dn` e `opendistro_security.authcz.admin_dn`,
       elas devem bater com os valores usados na configuração da ferramenta de certificados
       - `opendistro_security.nodes_dn` deve conter todos os dns definidos em `nodes[0]`
       - `opendistro_security.authcz.admin_dn` deve conter todos os dns definidos em `clients`
    3. opendistro_security.ssl.transport.pemkey_password e opendistro_security.ssl.http.pemkey_password
-      devem conter os valores de `ca.root.pkPassword` e `defaults.pkPassword` respectivamente
+      devem conter os valores de `ca.root.pkPassword` e `defaults.pkPassword`, respectivamente
       (geralmente a mesma senha)
    4. `http.cors.allow-origin` deve ser a url do serviço `web`, do site.
 
@@ -63,15 +65,10 @@
    ```bash
    docker-compose up -d es-node1
    ```
-- [ ] Gere senhas para os usuários do ES e substitua essas informações no arquivo 
+- [ ] Gere senhas para os usuários do ES e substitua essas informações no arquivo
    `internal_users.yml` e nos arquivos de var. ambiente `.env` e `backend.env`
   `docker exec es-node1 /bin/sh /usr/share/elasticsearch/plugins/opendistro_security/tools/hash.sh -p <senha>`
-- [ ] Definir variáveis ambiente dentro dos arquivos
-- [ ] Assegurar a permissão dos arquivos de configuração
-- [ ] Reconstruir imagens
-  ```
-  docker-compose build
-  ```
+- [ ] Definir variáveis ambiente com as senhas dentro dos arquivos
 - [ ] Aplicar as configurações dentro do container do ES
   ```bash
   docker exec -it es-node1 bash
@@ -85,6 +82,12 @@
 
    ```
 - [ ] Reinicie o container es-node1
+- [ ] Assegure a permissão dos arquivos de configuração
+- [ ] Reconstruir imagens
+  ```
+  docker-compose build
+  ```
+
 - [ ] Suba os outros containers, menos o proxy
   ```
   docker-compose up -d web es-node1 webadmin database files celery-worker rabbitmq certs-extractor contact_message_relay
