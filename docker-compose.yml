@@ -27,6 +27,11 @@ services:
       RECAPTCHA_KEY: $RECAPTCHA_KEY
       MEDIA_URL: $MEDIA_URL
       API_URL: $API_URL
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_web.rule=Host(`xram-memory.felipelube.com`)"
+      - "traefik.http.routers.xram_memory_web.entrypoints=https"
+      - "traefik.http.routers.xram_memory_web.tls.certResolver=lets"
 
   es-node1:
     image: amazon/opendistro-for-elasticsearch:0.8.0
@@ -35,7 +40,7 @@ services:
     environment:
       - cluster.name=xram-memory
       - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
       - network.host=0.0.0.0 # required if not using the demo Security configuration
     ulimits:
       memlock:
@@ -43,6 +48,11 @@ services:
         hard: -1
     env_file:
       - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_es1.rule=Host(`es1-xram-memory.felipelube.com`)"
+      - "traefik.http.routers.xram_memory_es1.entrypoints=https"
+      - "traefik.http.routers.xram_memory_es1.tls.certResolver=lets"
     volumes:
       # volume com os dados
       - es-data1:/usr/share/elasticsearch/data
@@ -83,7 +93,11 @@ services:
     networks:
       - web
       - internal
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_webadmin.rule=Host(`xram-memory.felipelube.com`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
+      - "traefik.http.routers.xram_memory_webadmin.entrypoints=https"
+      - "traefik.http.routers.xram_memory_webadmin.tls.certResolver=lets"
 
   database:
     image: postgres:11.6-alpine
@@ -111,6 +125,12 @@ services:
       - static/:/var/www/static/
     networks:
       - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_files.rule=Host(`xram-memory.felipelube.com`) && PathPrefix(`/static/`,`/media/`)"
+      - "traefik.http.routers.xram_memory_files.entrypoints=https"
+      - "traefik.http.routers.xram_memory_files.tls.certResolver=lets"
+
 
   celery-worker:
     build: ./celery_worker
@@ -135,32 +155,6 @@ services:
     networks:
       - internal
 
-  reverse-proxy:
-    image: traefik:1.7
-    container_name: proxy
-    restart: always
-    env_file:
-      - ./proxy/.env
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./proxy/traefik.toml:/etc/traefik/traefik.toml:ro
-      - ./elastic_search/certificates/out/root-ca.pem:/etc/traefik/root-ca.pem
-      - ./proxy/acme.json:/acme.json:rw
-    networks:
-      web:
-        aliases:
-          - es1.xram-memory.local
-          - xram-memory.local
-
-  certs-extractor:
-    image: danielhuisman/traefik-certificate-extractor
-    restart: always
-    volumes:
-      - ./proxy/:/app/data/:ro
-      - ./proxy/certificates/:/app/certs:rw
-
   contact_message_relay:
     build: ./contact_message_relay
     image: xram_memory/contact_message_relay
@@ -173,6 +167,11 @@ services:
     restart: always
     networks:
       - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_contact.rule=Host(`contact-xram-memory.felipelube.com`)"
+      - "traefik.http.routers.xram_memory_contact.entrypoints=https"
+      - "traefik.http.routers.xram_memory_contact.tls.certResolver=lets"
 
   backup:
     image: xram_memory/backup:alpine-3.10
@@ -189,6 +188,7 @@ services:
 
 networks:
   web:
+    external: true
   internal:
 
 volumes:
