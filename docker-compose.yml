@@ -29,7 +29,7 @@ services:
       API_URL: $API_URL
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_web.rule=Host(`xram-memory.felipelube.com`)"
+      - "traefik.http.routers.xram_memory_web.rule=Host(`$DOMAIN`)"
       - "traefik.http.routers.xram_memory_web.entrypoints=https"
       - "traefik.http.routers.xram_memory_web.tls.certResolver=lets"
 
@@ -50,7 +50,7 @@ services:
       - .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_es1.rule=Host(`es1-xram-memory.felipelube.com`)"
+      - "traefik.http.routers.xram_memory_es1.rule=Host(`$ES_DOMAIN`)"
       - "traefik.http.routers.xram_memory_es1.entrypoints=https"
       - "traefik.http.routers.xram_memory_es1.tls.certResolver=lets"
     volumes:
@@ -95,7 +95,7 @@ services:
       - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_webadmin.rule=Host(`xram-memory.felipelube.com`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
+      - "traefik.http.routers.xram_memory_webadmin.rule=Host(`$DOMAIN`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
       - "traefik.http.routers.xram_memory_webadmin.entrypoints=https"
       - "traefik.http.routers.xram_memory_webadmin.tls.certResolver=lets"
 
@@ -127,7 +127,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_files.rule=Host(`xram-memory.felipelube.com`) && PathPrefix(`/static/`,`/media/`)"
+      - "traefik.http.routers.xram_memory_files.rule=Host(`$DOMAIN`) && PathPrefix(`/static/`,`/media/`)"
       - "traefik.http.routers.xram_memory_files.entrypoints=https"
       - "traefik.http.routers.xram_memory_files.tls.certResolver=lets"
 
@@ -169,7 +169,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_contact.rule=Host(`contact-xram-memory.felipelube.com`)"
+      - "traefik.http.routers.xram_memory_contact.rule=Host(`$CONTACT_MESSAGE_RELAY_DOMAIN`)"
       - "traefik.http.routers.xram_memory_contact.entrypoints=https"
       - "traefik.http.routers.xram_memory_contact.tls.certResolver=lets"
 
