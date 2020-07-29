@@ -125,14 +125,18 @@ services:
 
   local_index_builder:
     restart: "no"
-    container_name: xram-memory-local-index_builder.localhost
+    container_name: "index-builder.local"
     build: ./micro_local_index_builder
     env_file:
       - backend.env #index_builder.env
     environment:
       AUTH_TOKEN: abacate
-      INDEX_FILE_PATH: /var/run/index.json
+      INDEX_FILE_PATH: /var/media/lunr_index/index.json
       TIMEOUT: 30
+    volumes:
+      - media:/var/media
+    networks:
+      - internal
     networks:
       - internal
 
