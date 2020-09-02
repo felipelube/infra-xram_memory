@@ -1,0 +1,177 @@
+version: "3.5"
+
+services:
+  web:
+    env_file:
+      - .env
+    build:
+      context: ./web
+      args:
+        ELASTIC_SEARCH_CREDENTIALS: $ELASTIC_SEARCH_CREDENTIALS
+        ELASTIC_SEARCH_SERVER: $ELASTIC_SEARCH_SERVER
+        CONTACT_MESSAGE_RELAY_URL: $CONTACT_MESSAGE_RELAY_URL
+        RECAPTCHA_KEY: $RECAPTCHA_KEY
+        MEDIA_URL: $MEDIA_URL
+        API_URL: $API_URL
+    image: xram_memory/web
+    container_name: "xram_memory_web"
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
+      - web
+    environment:
+      ELASTIC_SEARCH_SERVER: $ELASTIC_SEARCH_SERVER
+      ELASTIC_SEARCH_CREDENTIALS: $ELASTIC_SEARCH_CREDENTIALS
+      CONTACT_MESSAGE_RELAY_URL: $CONTACT_MESSAGE_RELAY_URL
+      RECAPTCHA_KEY: $RECAPTCHA_KEY
+      MEDIA_URL: $MEDIA_URL
+      API_URL: $API_URL
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_web.rule=Host(`$DOMAIN`)"
+
+  webadmin:
+    build: ./webadmin
+    image: xram_memory/webadmin
+    container_name: "xram_memory_webadmin"
+    env_file:
+      - .env
+      - backend.env
+    tmpfs:
+      - /tmp
+    restart: always
+    volumes:
+      - media/:/app/media/
+      - static/:/app/staticfiles/
+    networks:
+      - web
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_webadmin.rule=Host(`$DOMAIN`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
+
+  database:
+    image: postgres:11.6-alpine
+    container_name: "xram_memory_db"
+    tmpfs:
+      - /tmp
+    restart: always
+    env_file:
+      - backend.env
+    volumes:
+      - database/:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  files:
+    image: kyma/docker-nginx
+    container_name: "xram_memory_files"
+    env_file:
+      - .env
+    tmpfs:
+      - /tmp
+    restart: always
+    volumes:
+      - media/:/var/www/media/
+      - static/:/var/www/static/
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_files.rule=Host(`$DOMAIN`) && PathPrefix(`/static/`,`/media/`)"
+
+  celery-worker:
+    build: ./celery_worker
+    image: xram_memory/celery_worker
+    tmpfs:
+      - /tmp
+    restart: always
+    env_file:
+      - .env
+      - backend.env
+    volumes:
+      - media/:/app/media/
+    networks:
+      - internal
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: xram_memory_rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error}]
+    networks:
+      - internal
+
+  contact_message_relay:
+    build: ./contact_message_relay
+    image: xram_memory/contact_message_relay
+    container_name: "xram_memory_contact_mr"
+    env_file:
+      - .env
+      - contact_message_relay.env
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram_memory_contact.rule=Host(`$CONTACT_MESSAGE_RELAY_DOMAIN`)"
+
+  backup:
+    image: xram_memory/backup:alpine-3.10
+    build: ./backup
+    container_name: xram_memory_backup
+    restart: unless-stopped
+    volumes:
+      - media:/mnt/source/media:ro
+      - borg-repo:/mnt/borg-repository
+      - ./backup/data/.config:/etc/borgmatic.d
+      - borg-cache:/root/.cache/borg
+    networks:
+      - internal
+
+  elasticlunr_index_builder:
+    image: xram_memory/elasticlunr_index_builder
+    build: ./elasticlunr_index_builder
+    container_name: xram-memory-elasticlunr-index-builder
+    env_file:
+      - backend.env
+    volumes:
+      - media:/mnt/django_media
+    environment:
+      INDEX_FILE_PATH: /mnt/django_media/lunr_index/index.json
+    networks:
+      - internal
+
+networks:
+  web:
+    external: true
+  internal:
+
+volumes:
+  media:
+    external:
+      name: xram_memory_webadmin_media
+
+  static:
+    external:
+      name: xram_memory_webadmin_static
+
+  database:
+    external:
+      name: xram_memory_db_data
+
+  es-data1:
+    external:
+      name: xram_memory_es1_data
+
+  borg-repo:
+    external:
+      name: xram_memory_backup_repo
+
+  borg-cache:
+    external:
+      name: xram_memory_backup_cache

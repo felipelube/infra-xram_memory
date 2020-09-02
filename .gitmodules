@@ -11,3 +11,6 @@
 [submodule "backup"]
 	path = backup
 	url = https://github.com/felubra/borgmatic-xram_memory.git
+[submodule "elasticlunr_index_builder"]
+	path = elasticlunr_index_builder
+	url = https://github.com/felubra/micro-lunr_index_builder.git
