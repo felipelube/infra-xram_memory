@@ -2,11 +2,10 @@ version: "3.5"
 
 services:
   web:
-    container_name: "xram-memory-web"
-    restart: "no"
+    env_file:
+      - .env
     build:
       context: ./web
-      target: development
       args:
         ELASTIC_SEARCH_CREDENTIALS: $ELASTIC_SEARCH_CREDENTIALS
         ELASTIC_SEARCH_SERVER: $ELASTIC_SEARCH_SERVER
@@ -14,98 +13,45 @@ services:
         RECAPTCHA_KEY: $RECAPTCHA_KEY
         MEDIA_URL: $MEDIA_URL
         API_URL: $API_URL
-    env_file:
-      - .env
-    ports:
-      - 9229:9229
-    volumes:
-      - ./web/src:/home/node/src
-      - ./web/nuxt.config.js:/home/node/nuxt.config.js
+    image: xram_memory/web
+    container_name: "xram_memory_web"
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
+      - web
     environment:
-      NUXT_HOST: "0.0.0.0"
+      ELASTIC_SEARCH_SERVER: $ELASTIC_SEARCH_SERVER
+      ELASTIC_SEARCH_CREDENTIALS: $ELASTIC_SEARCH_CREDENTIALS
+      CONTACT_MESSAGE_RELAY_URL: $CONTACT_MESSAGE_RELAY_URL
+      RECAPTCHA_KEY: $RECAPTCHA_KEY
+      MEDIA_URL: $MEDIA_URL
+      API_URL: $API_URL
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram_memory_web.rule=Host(`$DOMAIN`)"
-      - "traefik.http.services.xram_memory_web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.xram_memory_web.entrypoints=https"
-      - "traefik.http.routers.xram_memory_web.priority=1"
-      - "traefik.http.routers.xram_memory_web.tls=true"
-      - "traefik.http.routers.xram_memory_web.tls.certResolver="
-    networks:
-      - web
-
-  es-node1:
-    image: amazon/opendistro-for-elasticsearch:0.8.0
-    restart: "no"
-    environment:
-      - cluster.name=xram-memory
-      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
-      - network.host=0.0.0.0 # required if not using the demo Security configuration
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    env_file:
-      - .env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_es1.rule=Host(`$ES_DOMAIN`)"
-      - "traefik.http.routers.xram_memory_es1.entrypoints=https"
-      - "traefik.http.routers.xram_memory_es1.tls"
-      - "traefik.http.routers.xram_memory_es1.tls.certResolver="
-    volumes:
-      # volume com os dados
-      - es-data1:/usr/share/elasticsearch/data
-      # autoridade certificadora
-      - ./elastic_search/certificates/out/root-ca.pem:/usr/share/elasticsearch/config/root-ca.pem
-      # certificados da REST api
-      - ./elastic_search/certificates/out/es-node1.pem:/usr/share/elasticsearch/config/esnode.pem
-      - ./elastic_search/certificates/out/es-node1.key:/usr/share/elasticsearch/config/esnode-key.key
-      # certificados de transporte
-      - ./elastic_search/certificates/out/es-node1_http.pem:/usr/share/elasticsearch/config/esnode_http.pem
-      - ./elastic_search/certificates/out/es-node1_http.key:/usr/share/elasticsearch/config/esnode-key_http.key
-      # certificados administrativos
-      - ./elastic_search/certificates/out/kirk.pem:/usr/share/elasticsearch/config/kirk.pem
-      - ./elastic_search/certificates/out/kirk-key.pem:/usr/share/elasticsearch/config/kirk-key.pem
-      # configuração geral
-      - ./elastic_search/custom-elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      # papéis e usuários
-      - ./elastic_search/roles.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles.yml
-      - ./elastic_search/roles_mapping.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles_mapping.yml
-      - ./elastic_search/internal_users.yml:/usr/share/elasticsearch/plugins/opendistro_security/securityconfig/internal_users.yml
-    networks:
-      - internal
-      - web
 
   webadmin:
-    restart: "no"
-    container_name: "xram-memory-webadmin"
-    build:
-      context: ./webadmin
-      target: development
+    build: ./webadmin
+    image: xram_memory/webadmin
+    container_name: "xram_memory_webadmin"
     env_file:
       - .env
       - backend.env
-    ports:
-      - 3000:3000
-      - 5678:5678
+    tmpfs:
+      - /tmp
+    restart: always
     volumes:
       - media/:/app/media/
       - static/:/app/staticfiles/
-      - ./webadmin/xram_memory:/app/xram_memory
-      - ./webadmin/conftest.py:/app/conftest.py
-      - ./webadmin/tests:/app/tests
+    networks:
+      - web
+      - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_webadmin.rule=Host(`$DOMAIN`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`, `/__debug__/`)"
-      - "traefik.http.services.xram_memory_webadmin.loadbalancer.server.port=8000"
-      - "traefik.http.routers.xram_memory_webadmin.entrypoints=https"
-      - "traefik.http.routers.xram_memory_webadmin.tls=true"
-      - "traefik.http.routers.xram_memory_webadmin.tls.certResolver="
+      - "traefik.http.routers.xram_memory_webadmin.rule=Host(`$DOMAIN`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
 
   database:
-    restart: "no"
     image: postgres:11.6-alpine
     container_name: "xram_memory_db"
     tmpfs:
@@ -113,38 +59,27 @@ services:
     restart: always
     env_file:
       - backend.env
-    ports:
-      - 5432:5432
     volumes:
       - database/:/var/lib/postgresql/data
     networks:
       - internal
 
   files:
-    restart: "no"
+    image: kyma/docker-nginx
+    container_name: "xram_memory_files"
     env_file:
       - .env
+    tmpfs:
+      - /tmp
+    restart: always
+    volumes:
+      - media/:/var/www/media/
+      - static/:/var/www/static/
+    networks:
+      - web
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram_memory_files.rule=Host(`$DOMAIN`) && PathPrefix(`/static/`,`/media/`)"
-      - "traefik.http.routers.xram_memory_files.entrypoints=https"
-      - "traefik.http.routers.xram_memory_files.tls=true"
-      - "traefik.http.routers.xram_memory_files.tls.certResolver="
-
-  local_index_builder:
-    restart: "no"
-    container_name: "index-builder.local"
-    build: ./micro_local_index_builder
-    env_file:
-      - backend.env #index_builder.env
-    environment:
-      AUTH_TOKEN: abacate
-      INDEX_FILE_PATH: /var/media/lunr_index/index.json
-      TIMEOUT: 30
-    volumes:
-      - media:/var/media
-    networks:
-      - internal
 
   celery-worker:
     build: ./celery_worker
@@ -152,52 +87,18 @@ services:
     tmpfs:
       - /tmp
     restart: always
-    depends_on:
-      - rabbitmq
-      - es-node1
-      - database
     env_file:
       - .env
       - backend.env
-    environment:
-      - CELERY_ENABLE_UTC=1
     volumes:
       - media/:/app/media/
-      - ./webadmin/xram_memory:/app/xram_memory
     networks:
       - internal
-
-  flower:
-    image: mher/flower
-    container_name: "xram_memory_flower"
-    networks:
-      - web
-      - internal
-    depends_on:
-      - rabbitmq
-    environment:
-      - CELERY_ENABLE_UTC=1
-      - CELERY_BROKER_URL=amqp://guest:guest@xram_memory_rabbitmq:5672
-      - USE_TZ=True
-      - TIME_ZONE='America/Sao_Paulo'
-      - CELERY_ENABLE_UTC=True
-      - CELERY_TIMEZONE='America/Sao_Paulo'
-      - FLOWER_PORT=8888
-    ports:
-      - 8888:8888
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_flower.rule=Host(`flower.xram-memory.localhost`)"
-      - "traefik.tcp.routers.xram_memory_flower.service=flower"
-      - "traefik.http.services.xram_memory_flower.loadbalancer.server.port=8888"
-      - "traefik.http.routers.xram_memory_flower.entrypoints=https"
-      - "traefik.http.routers.xram_memory_flower.tls=true"
-
 
   rabbitmq:
     image: rabbitmq:3-alpine
     container_name: xram_memory_rabbitmq
-    restart: "no"
+    restart: always
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error}]
     networks:
@@ -212,43 +113,38 @@ services:
       - contact_message_relay.env
     tmpfs:
       - /tmp
-    restart: "no"
-    environment:
-      - CORS_ORIGINS=https://xram-memory.localhost
-      - RECAPTCHA_SECRET=6LdwWrIZAAAAAP9p1ZKzUXpzEaGjNz83mtyjG1va
-      - SMTP_MAIL_SERVER=xram-memory-mail-catcher
-      - SMTP_MAIL_SERVER_PORT=1025
-      - USER_ACCOUNT=felipe.lubra@gmail.com
-      - USER_PASS=abacate
-      - DESTINATION=felipe.lubra@gmail.com
-      - SUBJECT=teste
+    restart: always
     networks:
       - web
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram_memory_contact.rule=Host(`$CONTACT_MESSAGE_RELAY_DOMAIN`)"
-      - "traefik.http.routers.xram_memory_contact.entrypoints=https"
-      - "traefik.http.routers.xram_memory_contact.tls.certResolver="
 
-  mail_catcher:
-    image: sj26/mailcatcher
-    container_name: xram-memory-mail-catcher
-    networks:
-      - web
-      #TODO: configurar o webadmin para enviar e-mails
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.xram_memory_mail_catcher.rule=Host(`mail.xram-memory.localhost`)"
-      - "traefik.tcp.routers.xram_memory_mail_catcher.service=mail_catcher"
-      - "traefik.http.services.xram_memory_mail_catcher.loadbalancer.server.port=1080"
-      - "traefik.http.routers.xram_memory_mail_catcher.entrypoints=https"
-      - "traefik.http.routers.xram_memory_mail_catcher.tls=true"
-
-  # Serviço DESABILITADO
   backup:
-    restart: "no"
-    entrypoint: "/bin/true"
+    image: xram_memory/backup:alpine-3.10
+    build: ./backup
+    container_name: xram_memory_backup
+    restart: unless-stopped
+    volumes:
+      - media:/mnt/source/media:ro
+      - borg-repo:/mnt/borg-repository
+      - ./backup/data/.config:/etc/borgmatic.d
+      - borg-cache:/root/.cache/borg
+    networks:
+      - internal
 
+  elasticlunr_index_builder:
+    image: xram_memory/elasticlunr_index_builder
+    build: ./elasticlunr_index_builder
+    container_name: xram-memory-elasticlunr-index-builder
+    env_file:
+      - backend.env
+    volumes:
+      - media:/mnt/django_media
+    environment:
+      INDEX_FILE_PATH: /mnt/django_media/lunr_index/index.json
+    networks:
+      - internal
 
 networks:
   web:
