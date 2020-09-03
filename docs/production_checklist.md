@@ -1,12 +1,12 @@
 - [ ] Sincronizar submódulos
 - [ ] Criar volumes e redes
   ```bash
-  docker network create web
-  docker volume create xram_memory_webadmin_media
-  docker volume create xram_memory_webadmin_static
-  docker volume create xram_memory_db_data
-  docker volume create xram_memory_es1_data
-  docker volume create xram_memory_backup_repo
+  docker network create web && \
+  docker volume create xram_memory_webadmin_media && \
+  docker volume create xram_memory_webadmin_static && \
+  docker volume create xram_memory_db_data && \
+  docker volume create xram_memory_es1_data && \
+  docker volume create xram_memory_backup_repo && \
   docker volume create xram_memory_backup_cache
   ```
 - [ ] Dar permissão ao usuário www-data nos volumes de arquivos:
@@ -87,6 +87,11 @@
   ```
   docker-compose build
   ```
+
+- [ ] (Opcional) Se estiver usando a imagem webadmin no estágio para desenvolvimento, colecione os arquivos estáticos:
+```bash
+docker-compose -f docker-compose.local.yml exec --user 33 webadmin  ./manage.py collectstatic
+```
 
 - [ ] Suba os outros containers, menos o proxy
   ```
