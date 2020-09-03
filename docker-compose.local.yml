@@ -146,6 +146,14 @@ services:
     networks:
       - internal
 
+  memcached:
+    image: memcached
+    container_name: xram_memory_memcached
+    command: -m 32
+    networks:
+      - internal
+
+
 networks:
   web:
     external: true
