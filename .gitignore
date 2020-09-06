@@ -9,3 +9,4 @@ elastic_search/*.yml
 proxy/acme.json
 proxy/certificates
 proxy/traefik.toml
+./temp
