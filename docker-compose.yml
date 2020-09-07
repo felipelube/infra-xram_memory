@@ -1,31 +1,46 @@
-version: "3.3"
+version: "3.5"
 
 services:
-
-  #traefik:
-  #  image: "traefik:v2.2"
-  #  container_name: "traefik"
-  #  command:
-  #    #- "--log.level=DEBUG"
-  #    - "--api.insecure=true"
-  #    - "--providers.docker=true"
-  #    - "--providers.docker.exposedbydefault=false"
-  #    - "--entrypoints.web.address=:80"
-  #    #- "--entrypoints.tls.address=:443"
-  #  ports:
-  #    - "80:80"
-  #    - "8080:8080"
-  #  volumes:
-  #    - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
+  web:
+    env_file:
+      - web.env
+    build:
+      context: ./web
+      target: production
+    image: xram_memory/web
+    container_name: xram-memory-web
+    environment:
+      SSR_API_URL: http://xram-memory-webadmin:8000
+      SSR_CONTACT_MESSAGE_RELAY_URL: http://xram-memory-contact-message-relay:3001
+      SSR_MEDIA_URL: http://xram-memory-files
+      SSR_LUNR_INDEX_URL: http://xram-memory-files/media/lunr_index/index.json
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xram-memory-web.rule=Host(`$DOMAIN`)"
+      - "traefik.http.routers.xram-memory-web.entrypoints=web"
 
   webadmin:
-    build: ./webadmin
+    build:
+      context: ./webadmin
+      target: production
     image: xram_memory/webadmin
-    container_name: "xram-memory-webadmin"
+    container_name: xram-memory-webadmin
     env_file:
-      - .env
       - backend.env
+    environment:
+      DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@xram-memory-db:5432/xram_memory
+      DJANGO_CELERY_BROKER_URL: amqp://guest:guest@xram-memory-rabbitmq:5672
+      DJANGO_LUNR_INDEX_REMOTE_HOST: http://xram-memory-elasticlunr-index-builder:3000
+      DJANGO_MEMCACHED_URL: xram-memory-memcached:11211
+      DJANGO_LUNR_INDEX_REMOTE_SECRET: $LUNR_INDEX_BUILDER_AUTH_TOKEN
+    networks:
+      - web
+      - default
     tmpfs:
       - /tmp
     restart: always
@@ -40,14 +55,34 @@ services:
       - "traefik.http.routers.xram-memory-webadmin.rule=Host(`$DOMAIN`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
       - "traefik.http.routers.xram-memory-webadmin.entrypoints=web"
 
-  files:
-    image: kyma/docker-nginx
-    container_name: "xram-memory-files"
-    env_file:
-      - .env
+  celery-worker:
+    build:
+      context: ./celery_worker
+    image: xram_memory/celery_worker
+    networks:
+      - default
+    environment:
+      DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@xram-memory-db:5432/xram_memory
+      DJANGO_CELERY_BROKER_URL: amqp://guest:guest@xram-memory-rabbitmq:5672
+      DJANGO_LUNR_INDEX_REMOTE_HOST: http://xram-memory-elasticlunr-index-builder:3000
+      DJANGO_MEMCACHED_URL: xram-memory-memcached:11211
+      DJANGO_LUNR_INDEX_REMOTE_SECRET: $LUNR_INDEX_BUILDER_AUTH_TOKEN
     tmpfs:
       - /tmp
     restart: always
+    env_file:
+      - backend.env
+    volumes:
+      - media/:/app/media/
+
+  files:
+    image: kyma/docker-nginx
+    container_name: xram-memory-files
+    tmpfs:
+      - /tmp
+    restart: always
+    networks:
+      - web
     volumes:
       - media/:/var/www/media/
       - static/:/var/www/static/
@@ -58,58 +93,46 @@ services:
   contact_message_relay:
     build: ./contact_message_relay
     image: xram_memory/contact_message_relay
-    container_name: "xram-memory-contact-message-relay"
+    container_name: xram-memory-contact-message-relay
     env_file:
-      - .env
       - contact_message_relay.env
     tmpfs:
       - /tmp
+    networks:
+      - web
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.xram-memory-contact-message-relay.rule=Host(`$CONTACT_MESSAGE_RELAY_DOMAIN`)"
+      - "traefik.http.routers.xram-memory-contact-message-relay.rule=Host(`contact.$DOMAIN`)"
       - "traefik.docker.network=web"
-
-
-
-  celery-worker:
-    build: ./celery_worker
-    image: xram_memory/celery_worker
-    tmpfs:
-      - /tmp
-    restart: always
-    depends_on:
-      - rabbitmq
-      - es-node1
-      - database
-    env_file:
-      - .env
-      - backend.env
-    volumes:
-      - media/:/app/media/
 
   rabbitmq:
     image: rabbitmq:3-alpine
     container_name: xram-memory-rabbitmq
+    networks:
+      - default
     restart: always
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error}]
 
   database:
     image: postgres:11.6-alpine
-    container_name: "xram-memory-db"
+    container_name: xram-memory-db
+    networks:
+      - default
     tmpfs:
       - /tmp
     restart: always
-    env_file:
-      - backend.env
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     volumes:
       - database/:/var/lib/postgresql/data
 
   backup:
     image: xram_memory/backup:alpine-3.10
     build: ./backup
-    container_name: xram_memory_backup
+    container_name: xram-memory-backup
     restart: unless-stopped
     volumes:
       - media:/mnt/source/media:ro
@@ -120,6 +143,8 @@ services:
   elasticlunr_index_builder:
     image: xram_memory/elasticlunr_index_builder
     build: ./elasticlunr_index_builder
+    networks:
+      - default
     container_name: xram-memory-elasticlunr-index-builder
     env_file:
       - backend.env
@@ -127,11 +152,13 @@ services:
       - media:/mnt/django_media
     environment:
       INDEX_FILE_PATH: /mnt/django_media/lunr_index/index.json
+      AUTH_TOKEN: $LUNR_INDEX_BUILDER_AUTH_TOKEN
 
   memcached:
     image: memcached
-    container_name: xram_memory_memcached
-    command: -m 32
+    container_name: xram-memory-memcached
+    networks:
+      - default
 
 volumes:
   media:
@@ -146,10 +173,6 @@ volumes:
     external:
       name: xram_memory_db_data
 
-  es-data1:
-    external:
-      name: xram_memory_es1_data
-
   borg-repo:
     external:
       name: xram_memory_backup_repo
@@ -157,3 +180,7 @@ volumes:
   borg-cache:
     external:
       name: xram_memory_backup_cache
+
+networks:
+  web:
+    external: true
