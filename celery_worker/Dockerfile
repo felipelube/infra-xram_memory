@@ -2,6 +2,6 @@ FROM xram_memory/webadmin
 
 COPY entrypoint.sh ./
 
-USER 1000
+USER 33
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
