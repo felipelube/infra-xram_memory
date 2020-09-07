@@ -22,7 +22,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram-memory-web.rule=Host(`$DOMAIN`)"
-      - "traefik.http.routers.xram-memory-web.entrypoints=web"
+      - "traefik.http.routers.xram-memory-web.entrypoints=https"
+      - "traefik.http.routers.xram-memory-web.tls=true"
+      #- "traefik.http.routers.xram-memory-web.tls.certResolver=lets"
 
   webadmin:
     build:
@@ -50,7 +52,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram-memory-webadmin.rule=Host(`$DOMAIN`) && PathPrefix(`/admin/`,`/api/v1/`,`/filer/`,`/tags_input/`)"
-      - "traefik.http.routers.xram-memory-webadmin.entrypoints=web"
+      - "traefik.http.routers.xram-memory-webadmin.entrypoints=https"
+      - "traefik.http.routers.xram-memory-webadmin.tls=true"
+      #- "traefik.http.routers.xram-memory-webadmin.certResolver=lets"
 
   celery-worker:
     build:
@@ -86,6 +90,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram-memory-files.rule=Host(`$DOMAIN`) && PathPrefix(`/static/`,`/media/`)"
+      - "traefik.http.routers.xram-memory-files.entrypoints=https"
+      #- "traefik.http.routers.xram-memory-files.tls=true"
+      - "traefik.http.routers.xram-memory-files.tls.certResolver=lets"
 
   contact_message_relay:
     build: ./contact_message_relay
@@ -101,6 +108,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram-memory-contact-message-relay.rule=Host(`contact.$DOMAIN`)"
+      - "traefik.http.routers.xram-memory-contact-message-relay.entrypoints=https"
+      - "traefik.http.routers.xram-memory-contact-message-relay.tls=true"
+      #- "traefik.http.routers.xram-memory-contact-message-relay.tls.certResolver=lets"
       - "traefik.docker.network=web"
 
   rabbitmq:
