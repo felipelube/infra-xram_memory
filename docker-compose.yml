@@ -47,7 +47,6 @@ services:
     restart: always
     depends_on:
       - database
-      - es-node1
     volumes:
       - media/:/app/media/
       - static/:/app/staticfiles/
