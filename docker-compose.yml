@@ -18,6 +18,8 @@ services:
     restart: always
     networks:
       - web
+    depends_on:
+      - webadmin
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.xram-memory-web.rule=Host(`$DOMAIN`)"
@@ -47,6 +49,7 @@ services:
     restart: always
     depends_on:
       - database
+      - memcached
     volumes:
       - media/:/app/media/
       - static/:/app/staticfiles/
